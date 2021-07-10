@@ -2,9 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/wholeScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:foregroundGravity="center"
     tools:context=".LoadImagesActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -35,30 +37,60 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_weight="3.75"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/FetchButton"
+            app:layout_constraintRight_toLeftOf="@id/FetchButtons"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.9" />
 
-        <Button
-            android:id="@+id/FetchButton"
+        <FrameLayout
+            android:id="@+id/FetchButtons"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:background="@drawable/rectangleborder"
-            android:scaleX="0.95"
-            android:text="Fetch"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textScaleX="1.05"
-            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_weight="1.25"
             app:layout_constraintLeft_toRightOf="@id/EnteredUrl"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.9" />
+            app:layout_constraintVertical_bias="0.9">
+
+            <Button
+                android:id="@+id/FetchButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/rectangleborder"
+                android:scaleX="0.95"
+                android:text="Fetch"
+                android:textAllCaps="false"
+                android:textColor="#000000"
+                android:textScaleX="1.05"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1.25"
+                app:layout_constraintLeft_toRightOf="@id/EnteredUrl"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.9" />
+
+            <Button
+                android:id="@+id/FetchButtonWhileScraping"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/rectangleborder"
+                android:scaleX="0.95"
+                android:text="Fetch"
+                android:textAllCaps="false"
+                android:textColor="#000000"
+                android:textScaleX="1.05"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1.25"
+                app:layout_constraintLeft_toRightOf="@id/EnteredUrl"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.9" />
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/Images"
@@ -287,22 +319,42 @@
         android:progressTint="#CCCCCC"
         android:scaleX="0.75"
         android:scaleY="0.5"
-        app:layout_constraintBottom_toBottomOf="@id/DownloadProgress"
+        app:layout_constraintBottom_toTopOf="@id/DownloadProgressProceedGame"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/Images"
         app:layout_constraintVertical_weight="1.25" />
 
-    <TextView
-        android:id="@+id/DownloadProgress"
+    <FrameLayout
+        android:id="@+id/DownloadProgressProceedGame"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:gravity="top|center_horizontal"
-        android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/DownloadProgressBar"
-        app:layout_constraintVertical_weight="0.75" />
+        app:layout_constraintVertical_weight="0.75">
+
+        <TextView
+            android:id="@+id/DownloadProgress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"
+            android:gravity="top|center_horizontal"
+            android:textColor="#000000"
+            app:layout_constraintVertical_weight="0.75" />
+
+        <TextView
+            android:id="@+id/ProceedToGame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#0ed145"
+            android:gravity="center"
+            android:text="PROCEED TO GAME"
+            android:textColor="#000000"
+            android:textSize="24sp"
+            app:layout_constraintVertical_weight="0.75" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,11 +2,16 @@ package com.example.ca;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.squareup.picasso.Picasso;
 
@@ -16,120 +21,142 @@ import java.util.List;
 
 public class GameActivity extends AppCompatActivity {
     int a = 0;
-    ImageView FirstChoice;
-    int PlayerScore = 0;
-
+    int playerScore = 0;
+    ImageView firstChoice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gameboard);
 
+        //get selected images from LoadImagesActivity explicit intent
         Intent intent = getIntent();
         List<String> ChosenImagesUrls = intent.getStringArrayListExtra("SelectedImagesUrls");
+
+        //put urls + duplicate in new list
         List<String> GameImageUrls = new ArrayList<>();
-        GameImageUrls.addAll(ChosenImagesUrls);
-        GameImageUrls.addAll(ChosenImagesUrls);
+        if (ChosenImagesUrls != null) {
+            GameImageUrls.addAll(ChosenImagesUrls);
+            GameImageUrls.addAll(ChosenImagesUrls);
+        }
+
+        //shuffle to randomise
         Collections.shuffle(GameImageUrls);
-        ScoreIncrease();
 
-
-        new Thread(() ->
-        {
-            for (int i = 21; i <= 32; i++) {
-                String a = "imageView" + i;
-
-                int emptyimageid = getResources().getIdentifier(a, "id", getPackageName());
-                ImageView emptyimage = findViewById(emptyimageid);
-                LoadImagesForGame(GameImageUrls.get(i - 21), emptyimage);
-            }
-        }).start();
-    }
-
-    public void LoadImagesForGame(String imgurl, ImageView iv) {
-        runOnUiThread(() ->
-        {
-            Picasso.get().load(imgurl).fit().into(iv);
-            iv.setContentDescription(imgurl);
-            iv.setForeground(getDrawable(R.drawable.x));
-            iv.setOnClickListener(view -> ChooseImage(iv));
-        });
-    }
-
-    public void showImage(ImageView imgv) {
-        runOnUiThread(() ->
-        {
-            imgv.setForeground(null);
-        });
-    }
-
-    public void showX(ImageView imgv) {
-        runOnUiThread(() ->
-        {
-            imgv.setForeground(getDrawable(R.drawable.x));
-        });
-    }
-
-    public void showTick(ImageView imgv) {
-        runOnUiThread(() ->
-        {
-            imgv.setForeground(getDrawable(R.drawable.tick));
-        });
-    }
-
-    public void showCross(ImageView imgv) {
-        runOnUiThread(() ->
-        {
-            imgv.setForeground(getDrawable(R.drawable.cross));
-        });
-    }
-
-    public void ScoreIncrease() {
+        //initialise scoreboard
         TextView score = findViewById(R.id.Score);
-        Chronometer GameTimer = findViewById(R.id.TimeElapsed);
-        runOnUiThread(() ->
-        {
-            if (PlayerScore < 6) {
-                score.setText("Current score:\n" + PlayerScore + " of 6 matches");
-                PlayerScore++;
-            } else {
-                score.setText("COMPLETED! :)");
-                GameTimer.stop();
-            }
-        });
+        score.setText(getString(R.string.currentScore, 0));
+
+        //load images into game
+        for (int i = 21; i <= 32; i++) {
+            String a = "imageView" + i;
+            int emptyImageId = getResources().getIdentifier(a, "id", getPackageName());
+            ImageView emptyImage = findViewById(emptyImageId);
+            loadImagesForGame(GameImageUrls.get(i - 21), emptyImage);
+        }
     }
 
-    public void ChooseImage(ImageView imagev) {
+    public void loadImagesForGame(String imageUrl, ImageView iv) {
+        Picasso.get().load(imageUrl).fit().into(iv);
+        iv.setContentDescription(imageUrl);
+        iv.setForeground(AppCompatResources.getDrawable(this, R.drawable.x));
+        iv.setOnClickListener(view -> chooseImage(iv));
+    }
+
+    public void chooseImage(ImageView iv) {
         Chronometer GameTimer = findViewById(R.id.TimeElapsed);
-        new Thread(() ->
+        ConstraintLayout images = findViewById(R.id.images);
+        TextView score = findViewById(R.id.Score);
         {
-            if (FirstChoice == null) {
+            if (firstChoice == null) {
                 GameTimer.start();
             }
             a++;
-            showImage(imagev);
+            showImage(iv);
             if (a == 2) {
-                if (FirstChoice.getContentDescription() == imagev.getContentDescription()) {
-                    showTick(FirstChoice);
-                    FirstChoice.setOnClickListener(null);
-                    showTick(imagev);
-                    imagev.setOnClickListener(null);
-                    ScoreIncrease();
-                } else {
-                    showCross(FirstChoice);
-                    showCross(imagev);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                if (firstChoice.getContentDescription() == iv.getContentDescription()) {
+                    showTick(firstChoice);
+                    firstChoice.setOnClickListener(null);
+                    showTick(iv);
+                    iv.setOnClickListener(null);
+                    int b = scoreUpdate();
+                    if (b == 6) {
+                        score.setText(R.string.completedSmiley);
+                        GameTimer.stop();
+                        showCongratulations();
+                        images.postDelayed(() -> startNewGame(), 5000);
                     }
-                    showX(FirstChoice);
-                    showX(imagev);
+
+                } else {
+                    showCross(firstChoice);
+                    showCross(iv);
+                    disableImageSelection();
+                    images.postDelayed(() ->
+                            enableImageSelection(firstChoice, iv), 1000);
                 }
                 a = 0;
             } else if (a == 1) {
-                FirstChoice = imagev;
+                firstChoice = iv;
+                firstChoice.setEnabled(false);
             }
-        }).start();
+        }
+    }
+
+    public void showImage(ImageView iv) {
+        iv.setForeground(null);
+    }
+
+    public void showX(ImageView iv) {
+        iv.setForeground(AppCompatResources.getDrawable(this, R.drawable.x));
+    }
+
+    public void showTick(ImageView iv) {
+        iv.setForeground(AppCompatResources.getDrawable(this, R.drawable.tick));
+    }
+
+    public void showCross(ImageView iv) {
+        iv.setForeground(AppCompatResources.getDrawable(this, R.drawable.cross));
+    }
+
+    public int scoreUpdate() {
+        playerScore++;
+        TextView score = findViewById(R.id.Score);
+        score.setText(getString(R.string.currentScore, playerScore));
+
+        return playerScore;
+    }
+
+    //disable while showing wrong pictures
+    public void disableImageSelection() {
+        ConstraintLayout images = findViewById(R.id.images);
+        for (int i = 0; i < images.getChildCount(); i++) {
+            View child = images.getChildAt(i);
+            child.setEnabled(false);
+        }
+    }
+
+    //enable after showing wrong pictures
+    public void enableImageSelection(ImageView a, ImageView b) {
+        ConstraintLayout images = findViewById(R.id.images);
+        for (int i = 0; i < images.getChildCount(); i++) {
+            View child = images.getChildAt(i);
+            if (child.getForeground() != AppCompatResources.getDrawable(this, R.drawable.tick))
+                child.setEnabled(true);
+        }
+        showX(a);
+        showX(b);
+    }
+
+    public void showCongratulations() {
+        LinearLayout winGame = findViewById(R.id.WinGame);
+        winGame.bringToFront();
+        Chronometer countDownToMainMenu = findViewById(R.id.TimeToNewGame);
+        countDownToMainMenu.setBase(SystemClock.elapsedRealtime()+5000);
+        countDownToMainMenu.start();
+    }
+
+    public void startNewGame() {
+        Intent intent = new Intent(this, LoadImagesActivity.class);
+        startActivity(intent);
     }
 }
